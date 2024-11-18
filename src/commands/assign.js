@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { CommandInteraction, MessageEmbed } = require('discord.js');
+const { MessageEmbed } = require('discord.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -22,39 +22,44 @@ module.exports = {
                 .setDescription('The case ID')
                 .setRequired(true)),
     async execute(interaction) {
-        const user = interaction.options.getUser('user');
-        const role = interaction.options.getString('role');
-        const caseId = interaction.options.getString('case');
+        try {
+            const user = interaction.options.getUser('user');
+            const role = interaction.options.getString('role');
+            const caseId = interaction.options.getString('case');
 
-        const guild = interaction.guild;
-        const member = guild.members.cache.get(user.id);
+            const guild = interaction.guild;
+            const member = guild.members.cache.get(user.id);
 
-        let roleName;
-        if (role === 'judge') {
-            roleName = 'Judge';
-        } else if (role === 'lawyer') {
-            roleName = 'Lawyer';
+            let roleName;
+            if (role === 'judge') {
+                roleName = 'Judge';
+            } else if (role === 'lawyer') {
+                roleName = 'Lawyer';
+            }
+
+            const roleToAdd = guild.roles.cache.find(r => r.name.toLowerCase() === roleName.toLowerCase());
+
+            if (!roleToAdd) {
+                await interaction.reply(`Role ${roleName} does not exist.`);
+                return;
+            }
+
+            if (member.roles.cache.has(roleToAdd.id)) {
+                await interaction.reply(`${user.username} is already assigned as ${roleName}.`);
+                return;
+            }
+
+            await member.roles.add(roleToAdd);
+
+            const embed = new MessageEmbed()
+                .setTitle('Role Assigned')
+                .setDescription(`${user.username} has been assigned as ${roleName} for case ${caseId}.`)
+                .setColor('GREEN');
+
+            await interaction.reply({ embeds: [embed] });
+        } catch (error) {
+            console.error(error);
+            await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
         }
-
-        const roleToAdd = guild.roles.cache.find(r => r.name.toLowerCase() === roleName.toLowerCase());
-
-        if (!roleToAdd) {
-            await interaction.reply(`Role ${roleName} does not exist.`);
-            return;
-        }
-
-        if (member.roles.cache.has(roleToAdd.id)) {
-            await interaction.reply(`${user.username} is already assigned as ${roleName}.`);
-            return;
-        }
-
-        await member.roles.add(roleToAdd);
-
-        const embed = new MessageEmbed()
-            .setTitle('Role Assigned')
-            .setDescription(`${user.username} has been assigned as ${roleName} for case ${caseId}.`)
-            .setColor('GREEN');
-
-        await interaction.reply({ embeds: [embed] });
-    }
+    },
 };

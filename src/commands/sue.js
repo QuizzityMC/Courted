@@ -13,11 +13,14 @@ module.exports = {
                 .setDescription('The reason for suing')
                 .setRequired(true)),
     async execute(interaction) {
-        await interaction.deferReply();
+        try {
+            const target = interaction.options.getUser('target');
+            const reason = interaction.options.getString('reason');
 
-        const target = interaction.options.getUser('target');
-        const reason = interaction.options.getString('reason');
-
-        await interaction.followUp(`${interaction.user.username} is suing ${target.username} for ${reason}.`);
+            await interaction.reply(`${interaction.user.username} is suing ${target.username} for ${reason}.`);
+        } catch (error) {
+            console.error(error);
+            await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+        }
     },
 };
