@@ -1,5 +1,4 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { CommandInteraction } = require('discord.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -14,9 +13,11 @@ module.exports = {
                 .setDescription('The reason for suing')
                 .setRequired(true)),
     async execute(interaction) {
+        await interaction.deferReply();
+
         const target = interaction.options.getUser('target');
         const reason = interaction.options.getString('reason');
 
-        await interaction.reply(`${interaction.user.username} is suing ${target.username} for ${reason}.`);
+        await interaction.followUp(`${interaction.user.username} is suing ${target.username} for ${reason}.`);
     },
 };
