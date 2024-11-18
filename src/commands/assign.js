@@ -13,8 +13,10 @@ module.exports = {
             option.setName('role')
                 .setDescription('Role to assign (judge/lawyer)')
                 .setRequired(true)
-                .addChoice('Judge', 'judge')
-                .addChoice('Lawyer', 'lawyer'))
+                .addChoices(
+                    { name: 'Judge', value: 'judge' },
+                    { name: 'Lawyer', value: 'lawyer' }
+                ))
         .addStringOption(option =>
             option.setName('case')
                 .setDescription('The case ID')
@@ -24,7 +26,6 @@ module.exports = {
         const role = interaction.options.getString('role');
         const caseId = interaction.options.getString('case');
 
-        // Assign roles and inform the user
         const guild = interaction.guild;
         const member = guild.members.cache.get(user.id);
 
